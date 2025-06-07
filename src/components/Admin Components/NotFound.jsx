@@ -13,7 +13,7 @@ const NotFound = () => {
       </p>
       <Link
         to="/admin/dashboard"
-        className="mt-6 inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-300 animate-fade-in delay-500"
+        className="mt-6 inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-300 animate-fade-in delay-500 "
       >
         Go Home
       </Link>
