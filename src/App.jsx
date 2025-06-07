@@ -1,8 +1,8 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Home from './pages/client page/home'
 import Aboute from './pages/client page/about'
-import NotFound from './components/Client Components/NotFound';
-import Dashboard from './components/Admin Components/LayOut'
+import NotFound from './Components/Client Components/NotFound';
+import Dashboard from './Components/Admin Components/ALayOut'
 function App() {
   return (
     <BrowserRouter>

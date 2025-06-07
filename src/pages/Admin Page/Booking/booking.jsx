@@ -35,6 +35,14 @@ const AdminBooking = () => {
     },
   ];
 
+
+const getStatusColor =(status) => {
+  if (status === 'confirmed') return 'text-green-600 font-semibold';
+  if (status === 'pending') return 'text-yellow-600 font-semibold';
+  if (status === 'cancelled') return 'text-red-600 font-semibold';
+  return '';
+}
+
   return (
     <div className="w-full p-5">
       <h1 className="text-2xl font-bold mb-4">Booking</h1>
@@ -61,7 +69,7 @@ const AdminBooking = () => {
               <td className="border px-4 py-2">{booking.checkInDate}</td>
               <td className="border px-4 py-2">{booking.checkOutDate}</td>
               <td className="border px-4 py-2">${booking.totalAmount}</td>
-              <td className={`border px-4 py-2 ${getStatusColor(booking.status)}`}>
+              <td className={`border border-white px-4 py-2 ${getStatusColor(booking.status)}`}>
                 {booking.status}
               </td>
               <td className="border px-4 py-2">
@@ -75,11 +83,6 @@ const AdminBooking = () => {
   );
 };
 
-function getStatusColor(status) {
-  if (status === 'confirmed') return 'text-green-600 font-semibold';
-  if (status === 'pending') return 'text-yellow-600 font-semibold';
-  if (status === 'cancelled') return 'text-red-600 font-semibold';
-  return '';
-}
+
 
 export default AdminBooking;
