@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Login from "../../assets/Login.jpg";
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-const BACKEND_URL = process.env.BACKEND_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -11,7 +11,7 @@ const LoginPage = () => {
 const handleLogin = (e) => {
   e.preventDefault(); 
 
-  axios.post({BACKEND_URL}+'/api/users/login', {
+   axios.post(`${BACKEND_URL}/api/users/login`, {
     email: email,
     password: password,
   })
