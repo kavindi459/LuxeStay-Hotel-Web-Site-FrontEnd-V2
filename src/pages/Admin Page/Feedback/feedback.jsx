@@ -3,9 +3,14 @@ import React , { useState } from 'react'
 export default function AdminFeedback() {
   const [showPopup, setShowPopup] = useState(false);
 
-  const handlePopup = () => {
-    setShowPopup(true);
-  }
+  
+
+const handlePopup = () => {
+  setShowPopup(true);
+  setTimeout(() => {
+    setShowPopup(false);
+  }, 3000); // 3 seconds
+};
 
 
   return (

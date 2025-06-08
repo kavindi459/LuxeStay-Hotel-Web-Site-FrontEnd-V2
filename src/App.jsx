@@ -4,6 +4,7 @@ import Aboute from './pages/client page/about'
 import NotFound from './Components/Client Components/NotFound';
 import Dashboard from './Components/Admin Components/ALayOut'
 import LoginPage from './Pages/Auth/loginPage';
+import LoginPages from './Pages/Auth/FireBaseLogin/LoginForm';
 function App() {
   return (
     <BrowserRouter>
@@ -17,7 +18,8 @@ function App() {
      <Route path="/about" element={<Aboute />} />
 
 
-     <Route path="auth/login" element={<LoginPage />} />
+     <Route path="/auth/login" element={<LoginPage />} />
+     <Route path="/auth/googlelogin" element={<LoginPages />} />
 
 
      <Route path="/*" element={<NotFound />} />
