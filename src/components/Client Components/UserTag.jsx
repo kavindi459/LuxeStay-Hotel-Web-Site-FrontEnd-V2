@@ -1,13 +1,13 @@
 import React ,{useState,useEffect} from 'react'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom';
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 const UserTag = () => {
 
   const [name, setName] = useState('');
   const [imageLink, setImageLink] = useState();
  const [userFound, setUserFound] = useState(false);
-
-
+  const navigate = useNavigate();
   
 
   
@@ -41,13 +41,14 @@ const UserTag = () => {
 
  },
  //dependencies array
- [userFound]
+ [ userFound]
 )
 
 //logout
 const handleLogout = () => {
   localStorage.removeItem('token');
   setUserFound(false)
+  navigate('/auth/login');
   
 }
  
@@ -55,13 +56,14 @@ const handleLogout = () => {
 
   return (
     <div className='flex items-center gap-3 cursor-pointer'>
+     
       <img className='rounded-full w-10 h-10' src={imageLink} style={{width:"50px",height:"50px"}} alt="" />
       <h1 className='text-lg font-bold '>{name} </h1>
 
 
       <button
       onClick={handleLogout}
-      className="bg-red-500 text-white px-4 py-2 rounded-md"
+      className="bg-red-500 text-white px-4 py-2 rounded-md cusor-pointer hover:bg-red-600 transition duration-300"
       >
         
         
