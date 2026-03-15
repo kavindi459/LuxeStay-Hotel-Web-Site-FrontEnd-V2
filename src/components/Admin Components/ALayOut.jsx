@@ -1,53 +1,41 @@
-
-
 import React from 'react';
-import SideBar from './sideBar';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import AdminDashboard from '../../pages/admin page/dashboard/dashboard';
-import AdminBooking from '../../pages/admin page/booking/booking';
-import AdminCategories from '../../Pages/Admin Page/Categories/categories';
-import AdminFeedback from '../../Pages/Admin Page/Feedback/feedback';
-import AdminGallery from '../../Pages/Admin Page/Gallery/gallery';
-import AdminUser from '../../Pages/Admin Page/Users/user';
-import AdminRooms from '../../Pages/Admin Page/Rooms/rooms';
-import NotFound from './NotFound';
-import AdminHeader from './AdminHeader';
-import AddCategories from '../../Pages/Admin Page/Categories/addCategories';
-import UpdateCategories from '../../Pages/Admin Page/Categories/UpdateCategories';
-import AddGallery from '../../Pages/Admin Page/Gallery/AddGallery';
-import UpdateGallery from '../../Pages/Admin Page/Gallery/UpdateGallery';
+import AdminSidebar from '../../components/admin/AdminSidebar.jsx';
+import AdminHeaderNew from '../../components/admin/AdminHeader.jsx';
+import AdminDashboard from '../../pages/admin/AdminDashboard.jsx';
+import AdminBookings from '../../pages/admin/AdminBookings.jsx';
+import AdminRooms from '../../pages/admin/AdminRooms.jsx';
+import AdminCategories from '../../pages/admin/AdminCategories.jsx';
+import AdminUsers from '../../pages/admin/AdminUsers.jsx';
+import AdminGallery from '../../pages/admin/AdminGallery.jsx';
+import AdminReviews from '../../pages/admin/AdminReviews.jsx';
+import AdminContacts from '../../pages/admin/AdminContacts.jsx';
 
 const LayOut = () => {
   return (
-    <div className="w-full max-h-screen overflow-hidden flex">
+    <div className="flex h-screen overflow-hidden bg-gray-100">
       {/* Sidebar */}
-      <div className="w-[20%] h-screen bg-blue-400 fixed top-0 left-0">
-        <SideBar />
+      <div className="w-56 shrink-0">
+        <AdminSidebar />
       </div>
 
       {/* Main Content */}
-      <div className="w-[80%] ml-[20%] bg-slate-900 text-white flex flex-col h-screen">
-        {/* Header stays fixed at the top */}
-        <div className="flex-shrink-0">
-          <AdminHeader />
-        </div>
-
-        {/* Scrollable page content */}
-        <div className="flex-grow overflow-y-auto p-5">
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <AdminHeaderNew />
+        <div className="flex-1 overflow-y-auto p-6">
           <Routes>
             <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/dashboard" element={<AdminDashboard />} />
-            <Route path="/booking" element={<AdminBooking />} />
-            <Route path="/categories" element={<AdminCategories />} />
-            <Route path="/categories/addcategories" element={<AddCategories />} />
-            <Route path="/categories/updatecategories" element={<UpdateCategories />} />
+            <Route path="/bookings" element={<AdminBookings />} />
             <Route path="/rooms" element={<AdminRooms />} />
-            <Route path="/users" element={<AdminUser />} />
-            <Route path="/feedback" element={<AdminFeedback />} />
+            <Route path="/categories" element={<AdminCategories />} />
+            <Route path="/users" element={<AdminUsers />} />
             <Route path="/gallery" element={<AdminGallery />} />
-            <Route path="/gallery/addgallery" element={<AddGallery />} />
-            <Route path="/gallery/updategallery" element={<UpdateGallery />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/reviews" element={<AdminReviews />} />
+            <Route path="/contacts" element={<AdminContacts />} />
+            {/* Legacy routes kept for backward compatibility */}
+            <Route path="/booking" element={<AdminBookings />} />
+            <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
           </Routes>
         </div>
       </div>

@@ -1,133 +1,114 @@
-import React, { useEffect, useState } from "react";
-import Login from "../../assets/Login.jpg";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuthStore } from "../../store/authStore.jsx";
+import api from "../../config/api.js";
+import toast from "react-hot-toast";
+import { Hotel, Eye, EyeOff } from "lucide-react";
+import Button from "../../components/ui/Button.jsx";
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const [initialLoading, setInitialLoading] = useState(true);
+  const { dispatch } = useAuthStore();
 
-  useEffect(() => {
-    const timer = setTimeout(() => setInitialLoading(false), 1500); // 1.5s splash
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    axios
-      .post(`${BACKEND_URL}/api/users/login`, {
-        email: email,
-        password: password,
-      })
-      .then((response) => {
-        console.log(response.data);
-        const token = response.data.token;
-        const role = response.data.data.role; // 👈 Extract role
+    try {
+      const response = await api.post("/api/users/login", { email, password });
+      const { token, data: user } = response.data;
 
-        localStorage.setItem("token", token);
+      dispatch({ type: "LOGIN", payload: { token, user } });
+      toast.success(`Welcome back, ${user.firstName}!`);
 
-        console.log("Token:", token);
-        console.log("Role:", role);
-
-        // Redirect based on role
-        if (role === 'Admin') {
-  navigate('/admin/dashboard');
-  setTimeout(() => setLoading(false), 300);
-} else if (role === 'User') {
-  navigate('/');
-  setTimeout(() => setLoading(false), 300);
-} else {
-  console.warn('Unknown role:', role);
-  setLoading(false);
-}
-
-      })
-
-      .catch((error) => {
-        console.error(error);
-        setLoading(false);
-      });
+      if (user.role === "Admin" || user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Invalid email or password");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (initialLoading || loading) {
-    return (
-      <div className="w-full h-screen relative overflow-hidden flex items-center justify-center">
-        {/* Background image */}
-        <img
-          src={Login}
-          alt="Login Background"
-          className="w-full h-full object-cover absolute inset-0 z-0"
-        />
-        <div className="flex justify-center items-center min-h-screen bg-background">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full h-screen relative overflow-hidden flex items-center justify-center">
-      {/* Background image */}
-      <img
-        src={Login}
-        alt="Login Background"
-        className="w-full h-full object-cover absolute inset-0 z-0"
-      />
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-2 text-blue-800 font-bold text-2xl mb-2">
+            <Hotel size={30} />
+            <span>LuxeStay</span>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
+          <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>
+        </div>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/50 z-10" />
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="john@example.com"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent"
+            />
+          </div>
 
-      {/* Login Form */}
-      <div className="absolute flex   z-20">
-        <div className="bg-white/15 backdrop-blur-md p-8 rounded-2xl shadow-xl w-80 sm:w-96">
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-            Login
-          </h1>
-
-          <form className="space-y-4" onSubmit={handleLogin}>
-            <div>
-              <label className="block text-sm font-medium text-gray-950 mb-1">
-                Email
-              </label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <div className="relative">
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your email"
-                autoComplete="email"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-950 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your email"
-                autoComplete="email"
                 required
+                placeholder="Enter your password"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
+          </div>
 
-            <button
-              type="submit"
-              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md font-semibold transition duration-300"
+          <div className="flex justify-end">
+            <Link
+              to="/auth/forgot-password"
+              className="text-sm text-blue-800 hover:underline"
             >
-              Login
-            </button>
-          </form>
-        </div>
+              Forgot password?
+            </Link>
+          </div>
+
+          <Button type="submit" loading={loading} className="w-full py-2.5">
+            Sign In
+          </Button>
+        </form>
+
+        <p className="text-center text-sm text-gray-500 mt-6">
+          Don't have an account?{" "}
+          <Link
+            to="/auth/register"
+            className="text-blue-800 font-semibold hover:underline"
+          >
+            Create account
+          </Link>
+        </p>
       </div>
     </div>
   );
