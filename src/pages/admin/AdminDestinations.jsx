@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapPin, Plus, Pencil, Trash2, Globe, Upload, Link2, Star, RefreshCw } from 'lucide-react';
+import { MapPin, Plus, Pencil, Trash2, Globe, Upload, Link2, Star, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const PAGE_SIZE = 6;
 import Modal from '../../components/ui/Modal.jsx';
 import Spinner from '../../components/ui/Spinner.jsx';
 import toast from 'react-hot-toast';
@@ -23,6 +25,7 @@ const AdminDestinations = () => {
 
   /* Delete confirm */
   const [deleteId, setDeleteId] = useState(null);
+  const [page, setPage] = useState(1);
 
   /* ── Fetch ── */
   const fetchAll = async () => {
@@ -187,7 +190,7 @@ const AdminDestinations = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {destinations.map((dest, i) => (
+          {destinations.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((dest, i) => (
             <div
               key={dest._id}
               className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 group"
@@ -274,6 +277,29 @@ const AdminDestinations = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {Math.ceil(destinations.length / PAGE_SIZE) > 1 && (
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-xs text-gray-500">Page {page} of {Math.ceil(destinations.length / PAGE_SIZE)} ({destinations.length} destinations)</p>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+              className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors bg-white">
+              <ChevronLeft size={14} />
+            </button>
+            {Array.from({ length: Math.ceil(destinations.length / PAGE_SIZE) }, (_, i) => i + 1).map(n => (
+              <button key={n} onClick={() => setPage(n)}
+                className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${n === page ? 'bg-blue-800 text-white' : 'bg-white border border-gray-200 hover:bg-gray-50 text-gray-600'}`}>
+                {n}
+              </button>
+            ))}
+            <button onClick={() => setPage(p => Math.min(Math.ceil(destinations.length / PAGE_SIZE), p + 1))} disabled={page === Math.ceil(destinations.length / PAGE_SIZE)}
+              className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors bg-white">
+              <ChevronRight size={14} />
+            </button>
+          </div>
         </div>
       )}
 

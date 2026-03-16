@@ -7,6 +7,8 @@ import Badge from '../../components/ui/Badge.jsx';
 import toast from 'react-hot-toast';
 import { Plus, Edit2, Trash2, ToggleLeft, ToggleRight, BedDouble, Users, X, ChevronLeft, ChevronRight, GripVertical, RefreshCw } from 'lucide-react';
 
+const PAGE_SIZE = 8;
+
 const AdminRooms = () => {
   const [rooms, setRooms] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -17,6 +19,7 @@ const AdminRooms = () => {
   const [deleting, setDeleting] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [page, setPage] = useState(1);
   const [form, setForm] = useState({ category: '', maxGuests: 2, description: '', availability: true, photos: [] });
 
   useEffect(() => {
@@ -146,12 +149,14 @@ const AdminRooms = () => {
     const catId = (r.category && typeof r.category === 'object') ? r.category._id : r.category;
     return catId === categoryFilter;
   });
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated  = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
+          <select value={categoryFilter} onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
             className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800">
             <option value="all">All Categories</option>
             {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
@@ -173,7 +178,7 @@ const AdminRooms = () => {
         <div className="text-center py-16 text-gray-400">No rooms found</div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filtered.map((room) => {
+          {paginated.map((room) => {
             const cat   = (room.category && typeof room.category === 'object') ? room.category : categories.find((c) => c._id === room.category) || {};
             const photo = room.photos?.[0];
             return (
@@ -251,6 +256,29 @@ const AdminRooms = () => {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-2">
+          <p className="text-xs text-gray-500">Page {page} of {totalPages} ({filtered.length} rooms)</p>
+          <div className="flex items-center gap-1">
+            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+              className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors bg-white">
+              <ChevronLeft size={14} />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+              <button key={n} onClick={() => setPage(n)}
+                className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${n === page ? 'bg-blue-800 text-white' : 'bg-white border border-gray-200 hover:bg-gray-50 text-gray-600'}`}>
+                {n}
+              </button>
+            ))}
+            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+              className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors bg-white">
+              <ChevronRight size={14} />
+            </button>
+          </div>
         </div>
       )}
 

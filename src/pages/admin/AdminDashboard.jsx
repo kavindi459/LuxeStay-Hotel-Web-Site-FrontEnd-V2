@@ -7,8 +7,11 @@ import toast from 'react-hot-toast';
 import { formatCurrency, formatDate } from '../../utils/formatDate.js';
 import {
   BedDouble, CalendarDays, Clock, CheckCircle, XCircle, DollarSign, Users,
-  ArrowRight, MessageSquare, Mail, Image, ImagePlay, UserCheck,
+  ArrowRight, MessageSquare, Mail, Image, ImagePlay, UserCheck, ChevronLeft, ChevronRight,
 } from 'lucide-react';
+
+const ROOMS_PER_PAGE    = 8;
+const BOOKINGS_PER_PAGE = 5;
 
 const HOME_KEYS = ['homeHero', 'homeRooms', 'homeCategories', 'homeCta'];
 const PAGE_KEYS = ['rooms', 'gallery', 'about', 'contact'];
@@ -194,10 +197,39 @@ const StatCard = ({ icon, label, value, color }) => (
   </div>
 );
 
+const Pagination = ({ page, totalPages, onPage }) => {
+  if (totalPages <= 1) return null;
+  return (
+    <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100">
+      <p className="text-xs text-gray-500">Page {page} of {totalPages}</p>
+      <div className="flex items-center gap-1">
+        <button onClick={() => onPage(p => Math.max(1, p - 1))} disabled={page === 1}
+          className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+          <ChevronLeft size={14} />
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+          <button key={n} onClick={() => onPage(n)}
+            className={`w-7 h-7 rounded-lg text-xs font-medium transition-colors ${
+              n === page ? 'bg-blue-800 text-white' : 'border border-gray-200 hover:bg-gray-50 text-gray-700'
+            }`}>
+            {n}
+          </button>
+        ))}
+        <button onClick={() => onPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
+          className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+          <ChevronRight size={14} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const AdminDashboard = () => {
-  const [stats,   setStats]   = useState(null);
-  const [rooms,   setRooms]   = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [stats,        setStats]        = useState(null);
+  const [rooms,        setRooms]        = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [roomPage,     setRoomPage]     = useState(1);
+  const [bookingPage,  setBookingPage]  = useState(1);
 
   useEffect(() => {
     Promise.all([
@@ -213,6 +245,15 @@ const AdminDashboard = () => {
   if (!stats) return <div className="text-center py-24 text-red-500">Failed to load stats</div>;
 
   const maxRevenue = Math.max(...(stats.monthlyRevenue?.map((m) => m.revenue) || [1]));
+
+  // Room pagination
+  const roomTotalPages   = Math.ceil(rooms.length / ROOMS_PER_PAGE);
+  const paginatedRooms   = rooms.slice((roomPage - 1) * ROOMS_PER_PAGE, roomPage * ROOMS_PER_PAGE);
+
+  // Booking pagination
+  const allBookings      = stats.recentBookings || [];
+  const bookingTotalPages = Math.ceil(allBookings.length / BOOKINGS_PER_PAGE);
+  const paginatedBookings = allBookings.slice((bookingPage - 1) * BOOKINGS_PER_PAGE, bookingPage * BOOKINGS_PER_PAGE);
 
   return (
     <div className="space-y-8">
@@ -285,8 +326,9 @@ const AdminDashboard = () => {
         {rooms.length === 0 ? (
           <div className="text-center py-10 text-gray-400 text-sm">No rooms found.</div>
         ) : (
+          <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-6">
-            {rooms.map((room) => {
+            {paginatedRooms.map((room) => {
               const photo    = room.photos?.[0];
               const catName  = room.category?.name  || 'Uncategorized';
               const catPrice = room.category?.price;
@@ -341,6 +383,8 @@ const AdminDashboard = () => {
               );
             })}
           </div>
+          <Pagination page={roomPage} totalPages={roomTotalPages} onPage={setRoomPage} />
+          </>
         )}
       </div>
 
@@ -362,7 +406,7 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {(stats.recentBookings || []).slice(0, 5).map((b) => {
+              {paginatedBookings.map((b) => {
                 const cat = b.roomId?.category || {};
                 return (
                   <tr key={b._id} className="hover:bg-gray-50">
@@ -378,6 +422,7 @@ const AdminDashboard = () => {
             </tbody>
           </table>
         </div>
+        <Pagination page={bookingPage} totalPages={bookingTotalPages} onPage={setBookingPage} />
       </div>
 
       {/* Recent Contact Messages */}

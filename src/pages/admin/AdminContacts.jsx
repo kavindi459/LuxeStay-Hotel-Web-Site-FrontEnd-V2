@@ -3,7 +3,9 @@ import api from '../../config/api.js';
 import Spinner from '../../components/ui/Spinner.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import toast from 'react-hot-toast';
-import { Mail, Trash2, Eye, MailOpen, Search, RefreshCw, Inbox } from 'lucide-react';
+import { Mail, Trash2, Eye, MailOpen, Search, RefreshCw, Inbox, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const PAGE_SIZE = 10;
 
 const AdminContacts = () => {
   const [messages, setMessages] = useState([]);
@@ -12,6 +14,7 @@ const AdminContacts = () => {
   const [search, setSearch] = useState('');
   const [viewModal, setViewModal] = useState({ open: false, msg: null });
   const [deleting, setDeleting] = useState(null); // id being deleted
+  const [page, setPage] = useState(1);
 
   const fetchMessages = async () => {
     setLoading(true);
@@ -122,7 +125,7 @@ const AdminContacts = () => {
           {['all', 'unread', 'read'].map((f) => (
             <button
               key={f}
-              onClick={() => setFilter(f)}
+              onClick={() => { setFilter(f); setPage(1); }}
               className={`px-4 py-2 font-medium capitalize transition-colors ${
                 filter === f ? 'bg-blue-800 text-white' : 'text-gray-500 hover:bg-gray-50'
               }`}
@@ -138,7 +141,7 @@ const AdminContacts = () => {
             type="text"
             placeholder="Search name, email, subject..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800"
           />
         </div>
@@ -157,7 +160,7 @@ const AdminContacts = () => {
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="divide-y divide-gray-50">
-            {filtered.map((msg) => (
+            {filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((msg) => (
               <div
                 key={msg._id}
                 className={`flex items-start gap-4 px-5 py-4 hover:bg-gray-50 transition-colors ${
@@ -214,6 +217,27 @@ const AdminContacts = () => {
               </div>
             ))}
           </div>
+          {Math.ceil(filtered.length / PAGE_SIZE) > 1 && (
+            <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100">
+              <p className="text-xs text-gray-500">Page {page} of {Math.ceil(filtered.length / PAGE_SIZE)} ({filtered.length} messages)</p>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                  className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+                  <ChevronLeft size={14} />
+                </button>
+                {Array.from({ length: Math.ceil(filtered.length / PAGE_SIZE) }, (_, i) => i + 1).map(n => (
+                  <button key={n} onClick={() => setPage(n)}
+                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${n === page ? 'bg-blue-800 text-white' : 'border border-gray-200 hover:bg-gray-50 text-gray-600'}`}>
+                    {n}
+                  </button>
+                ))}
+                <button onClick={() => setPage(p => Math.min(Math.ceil(filtered.length / PAGE_SIZE), p + 1))} disabled={page === Math.ceil(filtered.length / PAGE_SIZE)}
+                  className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

@@ -6,13 +6,16 @@ import Button from '../../components/ui/Button.jsx';
 import StarRating from '../../components/ui/StarRating.jsx';
 import { formatDate } from '../../utils/formatDate.js';
 import toast from 'react-hot-toast';
-import { CheckCircle, XCircle, Trash2, Star, MessageSquare, Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, Star, MessageSquare, Eye, EyeOff, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const PAGE_SIZE = 10;
 
 const AdminReviews = () => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('all'); // all | pending | accepted
   const [ratingFilter, setRatingFilter] = useState('all');
+  const [page, setPage] = useState(1);
   const [deleteModal, setDeleteModal] = useState({ open: false, review: null });
   const [deleting, setDeleting] = useState(false);
   const [toggling, setToggling] = useState(null); // reviewId being toggled
@@ -113,7 +116,7 @@ const AdminReviews = () => {
           ].map(({ key, label }) => (
             <button
               key={key}
-              onClick={() => setTab(key)}
+              onClick={() => { setTab(key); setPage(1); }}
               className={`px-4 py-2 font-medium transition-colors ${
                 tab === key ? 'bg-blue-800 text-white' : 'text-gray-500 hover:bg-gray-50'
               }`}
@@ -126,7 +129,7 @@ const AdminReviews = () => {
         {/* Star filter */}
         <select
           value={ratingFilter}
-          onChange={(e) => setRatingFilter(e.target.value)}
+          onChange={(e) => { setRatingFilter(e.target.value); setPage(1); }}
           className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 bg-white"
         >
           <option value="all">All Ratings</option>
@@ -163,7 +166,7 @@ const AdminReviews = () => {
                       No reviews found
                     </td>
                   </tr>
-                ) : filtered.map((r) => (
+                ) : filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((r) => (
                   <tr key={r._id} className={`hover:bg-gray-50 transition-colors ${!r.isVisible ? 'bg-amber-50/40' : ''}`}>
                     {/* Guest */}
                     <td className="px-4 py-3">
@@ -254,6 +257,27 @@ const AdminReviews = () => {
               </tbody>
             </table>
           </div>
+          {Math.ceil(filtered.length / PAGE_SIZE) > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+              <p className="text-xs text-gray-500">Page {page} of {Math.ceil(filtered.length / PAGE_SIZE)} ({filtered.length} reviews)</p>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                  className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+                  <ChevronLeft size={14} />
+                </button>
+                {Array.from({ length: Math.ceil(filtered.length / PAGE_SIZE) }, (_, i) => i + 1).map(n => (
+                  <button key={n} onClick={() => setPage(n)}
+                    className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${n === page ? 'bg-blue-800 text-white' : 'border border-gray-200 hover:bg-gray-50 text-gray-600'}`}>
+                    {n}
+                  </button>
+                ))}
+                <button onClick={() => setPage(p => Math.min(Math.ceil(filtered.length / PAGE_SIZE), p + 1))} disabled={page === Math.ceil(filtered.length / PAGE_SIZE)}
+                  className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors">
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

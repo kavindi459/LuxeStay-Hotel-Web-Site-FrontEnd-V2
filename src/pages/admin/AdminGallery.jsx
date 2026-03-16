@@ -4,16 +4,21 @@ import Spinner from '../../components/ui/Spinner.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import Button from '../../components/ui/Button.jsx';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Upload, Star, RefreshCw } from 'lucide-react';
+import { Trash2, Upload, Star, RefreshCw, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const PAGE_SIZE = 10;
 
 const AdminGallery = () => {
   const [items,       setItems]       = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [uploadModal, setUploadModal] = useState(false);
+  const [editModal,   setEditModal]   = useState({ open: false, item: null });
   const [deleteModal, setDeleteModal] = useState({ open: false, item: null });
   const [saving,      setSaving]      = useState(false);
   const [deleting,    setDeleting]    = useState(false);
   const [form,        setForm]        = useState({ name: '', description: '', image: null });
+  const [editForm,    setEditForm]    = useState({ name: '', description: '', image: null });
+  const [page,        setPage]        = useState(1);
 
   useEffect(() => { fetchItems(); }, []);
 
@@ -67,6 +72,30 @@ const AdminGallery = () => {
     }
   };
 
+  const openEdit = (item) => {
+    setEditForm({ name: item.name, description: item.description || '', image: null });
+    setEditModal({ open: true, item });
+  };
+
+  const handleUpdate = async () => {
+    if (!editForm.name) { toast.error('Name is required'); return; }
+    setSaving(true);
+    try {
+      const fd = new FormData();
+      fd.append('name', editForm.name);
+      fd.append('description', editForm.description);
+      if (editForm.image) fd.append('image', editForm.image);
+      await api.put(`/api/gallery/update/${editModal.item._id}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      toast.success('Gallery item updated!');
+      setEditModal({ open: false, item: null });
+      fetchItems();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleToggleFeatured = async (item) => {
     try {
       const res = await api.patch(`/api/gallery/featured/${item._id}`);
@@ -93,8 +122,9 @@ const AdminGallery = () => {
       ) : items.length === 0 ? (
         <div className="text-center py-16 text-gray-400">No gallery items yet. Upload the first one!</div>
       ) : (
+        <>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {items.map((item) => (
+          {items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((item) => (
             <div key={item._id} className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 group relative">
               <div className="aspect-square overflow-hidden">
                 <img
@@ -126,13 +156,23 @@ const AdminGallery = () => {
                 <Star size={13} fill={item.isFeatured ? 'white' : 'none'} />
               </button>
 
-              {/* Delete button */}
-              <button
-                onClick={() => setDeleteModal({ open: true, item })}
-                className="absolute bottom-2 right-2 bg-red-600 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
-              >
-                <Trash2 size={12} />
-              </button>
+              {/* Edit / Delete buttons */}
+              <div className="absolute bottom-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => openEdit(item)}
+                  className="bg-blue-600 text-white p-1.5 rounded-full hover:bg-blue-700"
+                  title="Edit"
+                >
+                  <Pencil size={12} />
+                </button>
+                <button
+                  onClick={() => setDeleteModal({ open: true, item })}
+                  className="bg-red-600 text-white p-1.5 rounded-full hover:bg-red-700"
+                  title="Delete"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
 
               <div className="p-3">
                 <p className="font-medium text-gray-900 text-sm truncate">{item.name}</p>
@@ -141,6 +181,28 @@ const AdminGallery = () => {
             </div>
           ))}
         </div>
+        {Math.ceil(items.length / PAGE_SIZE) > 1 && (
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-xs text-gray-500">Page {page} of {Math.ceil(items.length / PAGE_SIZE)} ({items.length} images)</p>
+            <div className="flex items-center gap-1">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
+                className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors bg-white">
+                <ChevronLeft size={14} />
+              </button>
+              {Array.from({ length: Math.ceil(items.length / PAGE_SIZE) }, (_, i) => i + 1).map(n => (
+                <button key={n} onClick={() => setPage(n)}
+                  className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${n === page ? 'bg-blue-800 text-white' : 'bg-white border border-gray-200 hover:bg-gray-50 text-gray-600'}`}>
+                  {n}
+                </button>
+              ))}
+              <button onClick={() => setPage(p => Math.min(Math.ceil(items.length / PAGE_SIZE), p + 1))} disabled={page === Math.ceil(items.length / PAGE_SIZE)}
+                className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 transition-colors bg-white">
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+        </>
       )}
 
       {/* Upload Modal */}
@@ -169,6 +231,39 @@ const AdminGallery = () => {
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="secondary" onClick={() => setUploadModal(false)}>Cancel</Button>
             <Button onClick={handleUpload} loading={saving}>Upload</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal isOpen={editModal.open} onClose={() => setEditModal({ open: false, item: null })} title="Edit Gallery Item">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Name <span className="text-red-500">*</span></label>
+            <input value={editForm.name} onChange={(e) => setEditForm((p) => ({ ...p, name: e.target.value }))}
+              placeholder="Image title"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea rows={2} value={editForm.description} onChange={(e) => setEditForm((p) => ({ ...p, description: e.target.value }))}
+              placeholder="Optional description"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 resize-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Replace Image <span className="text-gray-400 font-normal">(optional)</span></label>
+            {editModal.item && !editForm.image && (
+              <img src={editModal.item.image} alt="" className="mb-2 w-full h-32 object-cover rounded-lg border" />
+            )}
+            <input type="file" accept="image/*" onChange={(e) => setEditForm((p) => ({ ...p, image: e.target.files[0] }))}
+              className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2" />
+            {editForm.image && (
+              <img src={URL.createObjectURL(editForm.image)} alt="" className="mt-2 w-full h-32 object-cover rounded-lg" />
+            )}
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="secondary" onClick={() => setEditModal({ open: false, item: null })}>Cancel</Button>
+            <Button onClick={handleUpdate} loading={saving}>Update</Button>
           </div>
         </div>
       </Modal>
