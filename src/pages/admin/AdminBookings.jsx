@@ -6,7 +6,7 @@ import Modal from '../../components/ui/Modal.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { formatDate, formatCurrency, calculateNights } from '../../utils/formatDate.js';
 import toast from 'react-hot-toast';
-import { Search, Download, CheckCircle, XCircle, CreditCard, Building2, Trash2 } from 'lucide-react';
+import { Search, Download, CheckCircle, XCircle, CreditCard, Building2, Trash2, RefreshCw } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -130,6 +130,9 @@ const AdminBookings = () => {
           <option value="confirmed">Confirmed</option>
           <option value="cancelled">Cancelled</option>
         </select>
+        <button onClick={fetchBookings} className="flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+          <RefreshCw size={14} /> Refresh
+        </button>
         <button onClick={exportCSV} className="flex items-center gap-2 text-sm text-gray-600 border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50">
           <Download size={14} /> Export CSV
         </button>
@@ -155,11 +158,27 @@ const AdminBookings = () => {
                 ) : paginated.map((b) => {
                   const cat = b.roomId?.category || {};
                   const nights = calculateNights(b.checkInDate, b.checkOutDate);
+                  const roomPhoto = b.roomId?.photos?.[0] || cat.image || null;
+                  const roomID = b.roomId?.roomID || null;
                   return (
                     <tr key={b._id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 font-mono text-xs font-bold text-blue-800 whitespace-nowrap">{b.bookingId}</td>
                       <td className="px-4 py-3 text-gray-700 max-w-[180px] truncate">{b.email}</td>
-                      <td className="px-4 py-3 text-gray-600">{cat.name || 'N/A'}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-2.5">
+                          {roomPhoto ? (
+                            <img src={roomPhoto} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0 border border-gray-100" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 text-blue-200 text-xs border border-gray-100">
+                              🛏
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-gray-800 font-medium text-xs truncate">{cat.name || 'N/A'}</p>
+                            {roomID && <p className="text-gray-400 text-xs font-mono">#{roomID}</p>}
+                          </div>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{formatDate(b.checkInDate)}</td>
                       <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{formatDate(b.checkOutDate)}</td>
                       <td className="px-4 py-3 text-gray-600">{nights}</td>
