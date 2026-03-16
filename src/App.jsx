@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
-import ScrollToTop from './Components/scroll_To_Top.jsx';
+import ScrollToTop from './components/ScrollToTop.jsx';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './store/authStore.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
