@@ -49,29 +49,36 @@ const RoomsPage = () => {
     setLoading(true);
     setError(null);
     try {
-      let url = '/api/room/get';
-      const params = new URLSearchParams();
       if (f.checkIn && f.checkOut) {
-        url = '/api/room/available';
-        params.set('checkIn', f.checkIn);
-        params.set('checkOut', f.checkOut);
-        if (f.guests) params.set('guests', f.guests);
-        if (f.category) params.set('category', f.category);
+        // Fetch ALL rooms + available rooms in parallel, then merge
+        const availParams = new URLSearchParams({ checkIn: f.checkIn, checkOut: f.checkOut });
+        if (f.guests) availParams.set('guests', f.guests);
+        if (f.category) availParams.set('category', f.category);
+
+        const [allRes, availRes] = await Promise.all([
+          api.get('/api/room/get'),
+          api.get(`/api/room/available?${availParams.toString()}`),
+        ]);
+
+        const availableIds = new Set((availRes.data.data || []).map((r) => r._id));
+        let data = (allRes.data.data || [])
+          .filter((r) => r.availability === true) // skip admin-disabled rooms
+          .map((r) => ({ ...r, unavailableForDates: !availableIds.has(r._id) }));
+
+        if (f.maxPrice) data = data.filter((r) => (r.category?.price || 0) <= Number(f.maxPrice));
+        if (f.category) data = data.filter((r) => r.category?._id === f.category || r.category === f.category);
+
+        // Sort: available first, then unavailable
+        data.sort((a, b) => (a.unavailableForDates ? 1 : 0) - (b.unavailableForDates ? 1 : 0));
+        setRooms(data);
+      } else {
+        // No dates — show only available rooms
+        const res = await api.get('/api/room/get');
+        let data = (res.data.data || []).filter((r) => r.availability === true);
+        if (f.maxPrice) data = data.filter((r) => (r.category?.price || 0) <= Number(f.maxPrice));
+        if (f.category) data = data.filter((r) => r.category?._id === f.category || r.category === f.category);
+        setRooms(data);
       }
-      const fullUrl = params.toString() ? `${url}?${params.toString()}` : url;
-      const res = await api.get(fullUrl);
-      let data = res.data.data || [];
-      // When no dates given, only show available rooms to users
-      if (url === '/api/room/get') {
-        data = data.filter((r) => r.availability === true);
-      }
-      if (f.maxPrice) {
-        data = data.filter((r) => (r.category?.price || 0) <= Number(f.maxPrice));
-      }
-      if (f.category && url === '/api/room/get') {
-        data = data.filter((r) => r.category?._id === f.category || r.category === f.category);
-      }
-      setRooms(data);
     } catch (err) {
       setError('Failed to fetch rooms. Please try again.');
     } finally {
@@ -184,10 +191,19 @@ const RoomsPage = () => {
           </div>
         ) : (
           <>
-            <p className="text-gray-500 text-sm mb-6">{rooms.length} room{rooms.length !== 1 ? 's' : ''} found</p>
+            <p className="text-gray-500 text-sm mb-6">
+              {rooms.length} room{rooms.length !== 1 ? 's' : ''} found
+              {filters.checkIn && filters.checkOut && (() => {
+                const avail = rooms.filter(r => !r.unavailableForDates).length;
+                const unavail = rooms.filter(r => r.unavailableForDates).length;
+                return unavail > 0
+                  ? <span> — <span className="text-green-600 font-medium">{avail} available</span>, <span className="text-red-500 font-medium">{unavail} unavailable</span> for selected dates</span>
+                  : null;
+              })()}
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {rooms.map((room) => (
-                <RoomCard key={room._id} room={room} />
+                <RoomCard key={room._id} room={room} unavailableForDates={room.unavailableForDates} searchDates={{ checkIn: filters.checkIn, checkOut: filters.checkOut }} />
               ))}
             </div>
           </>

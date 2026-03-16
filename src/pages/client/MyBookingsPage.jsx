@@ -129,10 +129,16 @@ const MyBookingsPage = () => {
                     {/* Info */}
                     <div className="p-5 flex-1 flex flex-col sm:flex-row gap-4">
                       <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-3">
+                        <div className="flex items-center gap-2 mb-3 flex-wrap">
                           <Badge status={booking.status} />
+                          {booking.paymentStatus && (
+                            <Badge status={booking.paymentStatus} />
+                          )}
                           <span className="text-xs text-gray-400 flex items-center gap-1">
                             <Hash size={10} /> {booking.bookingId}
+                          </span>
+                          <span className="text-xs text-gray-400 capitalize">
+                            {booking.paymentMethod === 'online' ? '💳 Paid Online' : '🏨 Pay at Hotel'}
                           </span>
                         </div>
                         <h3 className="font-bold text-gray-900 text-lg">{category.name || 'Room'}</h3>

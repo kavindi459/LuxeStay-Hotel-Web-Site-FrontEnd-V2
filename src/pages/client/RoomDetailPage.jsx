@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Spinner from '../../components/ui/Spinner.jsx';
 import StarRating from '../../components/ui/StarRating.jsx';
 import Badge from '../../components/ui/Badge.jsx';
@@ -7,7 +7,7 @@ import { useAuthStore } from '../../store/authStore.jsx';
 import { formatCurrency, calculateNights } from '../../utils/formatDate.js';
 import api from '../../config/api.js';
 import toast from 'react-hot-toast';
-import { Users, CalendarDays, ChevronLeft, ChevronRight, Star, Send } from 'lucide-react';
+import { Users, CalendarDays, ChevronLeft, ChevronRight, Star, Send, CalendarX } from 'lucide-react';
 
 /* Clickable star picker */
 const StarPicker = ({ value, onChange }) => (
@@ -34,16 +34,21 @@ const StarPicker = ({ value, onChange }) => (
 const RoomDetailPage = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated } = useAuthStore();
   const [room, setRoom] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [reviewStats, setReviewStats] = useState({ averageRating: 0, totalReviews: 0 });
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
+  const [checkIn, setCheckIn] = useState(location.state?.checkIn || '');
+  const [checkOut, setCheckOut] = useState(location.state?.checkOut || '');
   const [guests, setGuests] = useState(1);
   const today = new Date().toISOString().split('T')[0];
+
+  // Date availability check
+  const [dateAvailability, setDateAvailability] = useState(null); // null | 'checking' | 'available' | 'unavailable'
+  const checkAvailTimer = useRef(null);
 
   // Review state
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' });
@@ -102,6 +107,23 @@ const RoomDetailPage = () => {
     fetchRoom();
   }, [roomId, isAuthenticated]);
 
+  // Check availability whenever checkIn or checkOut changes
+  useEffect(() => {
+    if (!checkIn || !checkOut || !room) { setDateAvailability(null); return; }
+    setDateAvailability('checking');
+    clearTimeout(checkAvailTimer.current);
+    checkAvailTimer.current = setTimeout(async () => {
+      try {
+        const res = await api.get(`/api/room/available?checkIn=${checkIn}&checkOut=${checkOut}`);
+        const availableIds = new Set((res.data.data || []).map((r) => r._id));
+        setDateAvailability(availableIds.has(room._id) ? 'available' : 'unavailable');
+      } catch {
+        setDateAvailability(null);
+      }
+    }, 600);
+    return () => clearTimeout(checkAvailTimer.current);
+  }, [checkIn, checkOut, room]);
+
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (reviewForm.rating === 0) {
@@ -149,9 +171,17 @@ const RoomDetailPage = () => {
   const category = typeof room.category === 'object' ? room.category : {};
   const images = room.photos?.length > 0 ? room.photos : [category.image || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800'];
   const nights = checkIn && checkOut ? calculateNights(checkIn, checkOut) : 0;
-  const totalPrice = nights * (category.price || 0);
+  const totalPrice = nights * (category.price || 0) * guests;
 
   const handleBookNow = () => {
+    if (!checkIn || !checkOut) {
+      toast.error('Please select check-in and check-out dates');
+      return;
+    }
+    if (nights <= 0) {
+      toast.error('Check-out date must be after check-in date');
+      return;
+    }
     if (!isAuthenticated) {
       toast.error('Please log in to make a booking');
       navigate('/auth/login', { state: { from: `/rooms/${roomId}` } });
@@ -374,16 +404,50 @@ const RoomDetailPage = () => {
                 <div>
                   <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">
                     <Users size={12} className="inline mr-1" />Guests
+                    <span className="text-gray-400 font-normal normal-case ml-1">(max {room.maxGuests})</span>
                   </label>
-                  <input type="number" value={guests} min={1} max={room.maxGuests} onChange={(e) => setGuests(Number(e.target.value))}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800" />
+                  <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-800">
+                    <button
+                      type="button"
+                      onClick={() => setGuests((g) => Math.max(1, g - 1))}
+                      disabled={guests <= 1}
+                      className="px-3 py-2.5 text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed text-lg font-bold select-none"
+                    >−</button>
+                    <span className="flex-1 text-center text-sm font-semibold text-gray-900 py-2.5">{guests}</span>
+                    <button
+                      type="button"
+                      onClick={() => setGuests((g) => Math.min(room.maxGuests, g + 1))}
+                      disabled={guests >= room.maxGuests}
+                      className="px-3 py-2.5 text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed text-lg font-bold select-none"
+                    >+</button>
+                  </div>
                 </div>
               </div>
 
-              {nights > 0 && (
+              {/* Date availability status */}
+              {dateAvailability === 'checking' && (
+                <div className="mt-4 flex items-center gap-2 text-sm text-gray-500 bg-gray-50 rounded-lg px-3 py-2.5">
+                  <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                  Checking availability...
+                </div>
+              )}
+              {dateAvailability === 'available' && (
+                <div className="mt-4 flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2.5">
+                  <span className="w-2 h-2 bg-green-500 rounded-full shrink-0" />
+                  Available for selected dates
+                </div>
+              )}
+              {dateAvailability === 'unavailable' && (
+                <div className="mt-4 flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5">
+                  <CalendarX size={15} className="shrink-0" />
+                  Already booked for selected dates
+                </div>
+              )}
+
+              {nights > 0 && dateAvailability !== 'unavailable' && (
                 <div className="bg-blue-50 rounded-lg p-4 mt-4 space-y-2">
                   <div className="flex justify-between text-sm text-gray-600">
-                    <span>${category.price || 0} × {nights} nights</span>
+                    <span>${category.price || 0} × {nights} night{nights !== 1 ? 's' : ''} × {guests} guest{guests !== 1 ? 's' : ''}</span>
                     <span>{formatCurrency(totalPrice)}</span>
                   </div>
                   <div className="border-t border-blue-200 pt-2 flex justify-between font-bold text-blue-800">
@@ -395,10 +459,16 @@ const RoomDetailPage = () => {
 
               <button
                 onClick={handleBookNow}
-                disabled={!room.availability}
+                disabled={!room.availability || dateAvailability === 'unavailable' || dateAvailability === 'checking'}
                 className="w-full mt-5 bg-blue-800 hover:bg-blue-900 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-colors"
               >
-                {room.availability ? 'Book Now' : 'Not Available'}
+                {!room.availability
+                  ? 'Room Not Available'
+                  : dateAvailability === 'unavailable'
+                    ? 'Not Available for These Dates'
+                    : !checkIn || !checkOut
+                      ? 'Select Dates to Book'
+                      : 'Book Now'}
               </button>
 
               {!isAuthenticated && (

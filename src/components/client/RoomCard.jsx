@@ -1,31 +1,43 @@
 import { useNavigate } from 'react-router-dom';
-import { Users, Star } from 'lucide-react';
+import { Users, CalendarX } from 'lucide-react';
 import Badge from '../ui/Badge.jsx';
 
-const RoomCard = ({ room }) => {
+const RoomCard = ({ room, unavailableForDates = false, searchDates = {} }) => {
   const navigate  = useNavigate();
   const category  = room.category || {};
   const image     = room.photos?.[0] || category.image || 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=600';
   const pricePerNight = category.price || 0;
   const description   = room.description || category.description || '';
 
+  const handleViewDetails = () => {
+    navigate(`/rooms/${room._id}`, {
+      state: searchDates.checkIn ? { checkIn: searchDates.checkIn, checkOut: searchDates.checkOut } : undefined,
+    });
+  };
+
   return (
-    <div className="card-hover bg-white rounded-2xl shadow-md overflow-hidden flex flex-col group">
+    <div className={`card-hover bg-white rounded-2xl shadow-md overflow-hidden flex flex-col group relative ${unavailableForDates ? 'opacity-70' : ''}`}>
 
       {/* Image */}
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
           src={image}
           alt={category.name || 'Room'}
-          className="img-zoom w-full h-full object-cover"
+          className={`img-zoom w-full h-full object-cover ${unavailableForDates ? 'grayscale-[40%]' : ''}`}
         />
 
         {/* Hover overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        {/* Availability badge */}
+        {/* Badge top-right */}
         <div className="absolute top-3 right-3">
-          <Badge status={room.availability ? 'available' : 'occupied'} />
+          {unavailableForDates ? (
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-300">
+              <CalendarX size={11} /> Unavailable
+            </span>
+          ) : (
+            <Badge status={room.availability ? 'available' : 'occupied'} />
+          )}
         </div>
 
         {/* Price pill on hover */}
@@ -69,12 +81,26 @@ const RoomCard = ({ room }) => {
           </div>
         )}
 
-        <button
-          onClick={() => navigate(`/rooms/${room._id}`)}
-          className="btn-gradient mt-auto w-full text-white font-semibold py-2.5 rounded-xl text-sm shadow-sm"
-        >
-          View Details
-        </button>
+        {unavailableForDates ? (
+          <div className="mt-auto space-y-2">
+            <p className="text-xs text-center text-red-500 font-medium">
+              Already booked for selected dates
+            </p>
+            <button
+              onClick={handleViewDetails}
+              className="w-full border border-gray-300 text-gray-500 hover:bg-gray-50 font-semibold py-2.5 rounded-xl text-sm transition-colors"
+            >
+              View Details
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleViewDetails}
+            className="btn-gradient mt-auto w-full text-white font-semibold py-2.5 rounded-xl text-sm shadow-sm"
+          >
+            View Details
+          </button>
+        )}
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import Modal from '../../components/ui/Modal.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { formatDate, formatCurrency, calculateNights } from '../../utils/formatDate.js';
 import toast from 'react-hot-toast';
-import { Search, Download, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Download, CheckCircle, XCircle, CreditCard, Building2 } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -18,6 +18,7 @@ const AdminBookings = () => {
   const [search, setSearch] = useState('');
   const [cancelModal, setCancelModal] = useState({ open: false, booking: null, reason: '' });
   const [actionLoading, setActionLoading] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ open: false, booking: null });
 
   useEffect(() => {
     fetchBookings();
@@ -47,8 +48,8 @@ const AdminBookings = () => {
   const handleConfirm = async (bookingId) => {
     setActionLoading(true);
     try {
-      await api.patch(`/api/booking/update/${bookingId}`, { status: 'confirmed' });
-      toast.success('Booking confirmed!');
+      await api.patch(`/api/booking/${bookingId}/confirm`);
+      toast.success('Booking confirmed! Confirmation email sent to guest.');
       fetchBookings();
     } catch {
       toast.error('Failed to confirm booking');
@@ -61,11 +62,10 @@ const AdminBookings = () => {
     if (!cancelModal.reason.trim()) return;
     setActionLoading(true);
     try {
-      await api.patch(`/api/booking/update/${cancelModal.booking._id}`, {
-        status: 'cancelled',
+      await api.patch(`/api/booking/${cancelModal.booking._id}/admin-cancel`, {
         reason: cancelModal.reason,
       });
-      toast.success('Booking cancelled!');
+      toast.success('Booking cancelled! Cancellation email sent to guest.');
       setCancelModal({ open: false, booking: null, reason: '' });
       fetchBookings();
     } catch {
@@ -129,14 +129,14 @@ const AdminBookings = () => {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  {['Booking ID', 'Guest Email', 'Room', 'Check-In', 'Check-Out', 'Nights', 'Status', 'Amount', 'Actions'].map((h) => (
+                  {['Booking ID', 'Guest Email', 'Room', 'Check-In', 'Check-Out', 'Nights', 'Status', 'Payment', 'Amount', 'Actions'].map((h) => (
                     <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {paginated.length === 0 ? (
-                  <tr><td colSpan={9} className="text-center py-12 text-gray-400">No bookings found</td></tr>
+                  <tr><td colSpan={10} className="text-center py-12 text-gray-400">No bookings found</td></tr>
                 ) : paginated.map((b) => {
                   const cat = b.roomId?.category || {};
                   const nights = calculateNights(b.checkInDate, b.checkOutDate);
@@ -149,13 +149,24 @@ const AdminBookings = () => {
                       <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{formatDate(b.checkOutDate)}</td>
                       <td className="px-4 py-3 text-gray-600">{nights}</td>
                       <td className="px-4 py-3"><Badge status={b.status} /></td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1 text-xs text-gray-600">
+                            {b.paymentMethod === 'online'
+                              ? <CreditCard size={11} className="text-blue-600" />
+                              : <Building2 size={11} className="text-gray-500" />}
+                            <span className="capitalize">{b.paymentMethod === 'pay_at_hotel' ? 'At Hotel' : 'Online'}</span>
+                          </div>
+                          <Badge status={b.paymentStatus || 'pending'} />
+                        </div>
+                      </td>
                       <td className="px-4 py-3 font-semibold text-gray-900 whitespace-nowrap">{formatCurrency(b.totalAmount)}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           {b.status === 'pending' && (
                             <>
                               <button
-                                onClick={() => handleConfirm(b._id)}
+                                onClick={() => setConfirmModal({ open: true, booking: b })}
                                 disabled={actionLoading}
                                 className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                                 title="Confirm"
@@ -201,10 +212,41 @@ const AdminBookings = () => {
         )}
       </div>
 
+      {/* Confirm Modal */}
+      <Modal isOpen={confirmModal.open} onClose={() => setConfirmModal({ open: false, booking: null })} title="Confirm Booking">
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            Confirm booking <span className="font-bold text-blue-800">#{confirmModal.booking?.bookingId}</span>?
+          </p>
+          {confirmModal.booking?.paymentMethod === 'pay_at_hotel' && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+              This is a <strong>Pay at Hotel</strong> booking. Guest will pay on arrival.
+            </div>
+          )}
+          {confirmModal.booking?.paymentMethod === 'online' && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
+              Payment of <strong>{formatCurrency(confirmModal.booking?.totalAmount)}</strong> has been collected online.
+            </div>
+          )}
+          <p className="text-xs text-gray-500">A confirmation email will be sent to the guest automatically.</p>
+          <div className="flex gap-3 justify-end">
+            <Button variant="secondary" onClick={() => setConfirmModal({ open: false, booking: null })}>Cancel</Button>
+            <Button onClick={() => { handleConfirm(confirmModal.booking._id); setConfirmModal({ open: false, booking: null }); }} loading={actionLoading}>
+              Confirm Booking
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Cancel Modal */}
       <Modal isOpen={cancelModal.open} onClose={() => setCancelModal({ open: false, booking: null, reason: '' })} title="Cancel Booking">
         <div className="space-y-4">
           <p className="text-gray-600">Cancelling booking <span className="font-bold text-blue-800">#{cancelModal.booking?.bookingId}</span></p>
+          {cancelModal.booking?.paymentMethod === 'online' && cancelModal.booking?.paymentStatus === 'paid' && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 text-sm text-orange-800">
+              This booking was <strong>paid online</strong>. Cancelling will mark it as refunded — please process the Stripe refund manually from your Stripe dashboard.
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Cancellation Reason <span className="text-red-500">*</span></label>
             <textarea

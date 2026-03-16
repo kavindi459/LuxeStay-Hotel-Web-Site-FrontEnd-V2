@@ -8,6 +8,11 @@ const statusStyles = {
   inactive: 'bg-gray-100 text-gray-600 border border-gray-300',
   admin: 'bg-blue-100 text-blue-800 border border-blue-300',
   user: 'bg-purple-100 text-purple-800 border border-purple-300',
+  paid: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+  refunded: 'bg-orange-100 text-orange-800 border border-orange-300',
+  failed: 'bg-red-100 text-red-800 border border-red-300',
+  online: 'bg-blue-100 text-blue-700 border border-blue-200',
+  pay_at_hotel: 'bg-gray-100 text-gray-600 border border-gray-300',
 };
 
 const Badge = ({ status, className = '' }) => {
