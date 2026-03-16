@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore.jsx';
 import { Menu, X, ChevronDown, User, CalendarDays, LogOut } from 'lucide-react';
 import toast from 'react-hot-toast';
-import logo from '../../assets/logo.png';
+import logo from '../../assets/Logo.png';
 
 const Navbar = () => {
   const { isAuthenticated, user, dispatch } = useAuthStore();
