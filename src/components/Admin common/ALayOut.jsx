@@ -1,17 +1,17 @@
 import React from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
-import AdminSidebar from '../../components/admin/AdminSidebar.jsx';
-import AdminHeaderNew from '../../components/admin/AdminHeader.jsx';
-import AdminDashboard from '../../pages/admin/AdminDashboard.jsx';
-import AdminBookings from '../../pages/admin/AdminBookings.jsx';
-import AdminRooms from '../../pages/admin/AdminRooms.jsx';
-import AdminCategories from '../../pages/admin/AdminCategories.jsx';
-import AdminUsers from '../../pages/admin/AdminUsers.jsx';
-import AdminGallery from '../../pages/admin/AdminGallery.jsx';
-import AdminReviews from '../../pages/admin/AdminReviews.jsx';
-import AdminContacts from '../../pages/admin/AdminContacts.jsx';
-import AdminDestinations from '../../pages/admin/AdminDestinations.jsx';
-import AdminBgImages from '../../pages/admin/AdminBgImages.jsx';
+import AdminSidebar from './AdminSidebar.jsx';
+import AdminHeaderNew from './AdminHeader.jsx';
+import AdminDashboard from '../../Pages/Admin Page/AdminDashboard.jsx';
+import AdminBookings from '../../pages/Admin Page/AdminBookings.jsx';
+import AdminRooms from '../../pages/Admin Page/AdminRooms.jsx';
+import AdminCategories from '../../pages/Admin Page/AdminCategories.jsx';
+import AdminUsers from '../../pages/Admin Page/AdminUsers.jsx';
+import AdminGallery from '../../pages/Admin Page/AdminGallery.jsx';
+import AdminReviews from '../../pages/Admin Page/AdminReviews.jsx';
+import AdminContacts from '../../pages/Admin Page/AdminContacts.jsx';
+import AdminDestinations from '../../pages/Admin Page/AdminDestinations.jsx';
+import AdminBgImages from '../../pages/Admin Page/AdminBgImages.jsx';
 
 const LayOut = () => {
   return (
