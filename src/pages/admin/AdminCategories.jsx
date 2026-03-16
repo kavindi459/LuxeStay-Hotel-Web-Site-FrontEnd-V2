@@ -4,7 +4,7 @@ import Spinner from '../../components/ui/Spinner.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import Button from '../../components/ui/Button.jsx';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Trash2, DollarSign } from 'lucide-react';
+import { Plus, Edit2, Trash2, DollarSign, Star } from 'lucide-react';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -13,6 +13,7 @@ const AdminCategories = () => {
   const [deleteModal, setDeleteModal] = useState({ open: false, cat: null });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [togglingId, setTogglingId] = useState(null);
   const [form, setForm] = useState({ name: '', price: '', description: '', features: '', image: '', imageFile: null });
 
   useEffect(() => { fetchCategories(); }, []);
@@ -81,6 +82,19 @@ const AdminCategories = () => {
     }
   };
 
+  const handleToggleFeatured = async (cat) => {
+    setTogglingId(cat._id);
+    try {
+      const res = await api.patch(`/api/category/toggle-featured/${cat._id}`);
+      setCategories((prev) => prev.map((c) => c._id === cat._id ? { ...c, isFeatured: res.data.data.isFeatured } : c));
+      toast.success(res.data.message);
+    } catch {
+      toast.error('Failed to toggle featured');
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const handleDelete = async () => {
     setDeleting(true);
     try {
@@ -111,13 +125,30 @@ const AdminCategories = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
           {categories.map((cat) => (
             <div key={cat._id} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-              {cat.image ? (
-                <img src={cat.image} alt={cat.name} className="w-full h-40 object-cover" />
-              ) : (
-                <div className="w-full h-40 bg-blue-50 flex items-center justify-center text-blue-200">
-                  <DollarSign size={40} />
-                </div>
-              )}
+              <div className="relative">
+                {cat.image ? (
+                  <img src={cat.image} alt={cat.name} className="w-full h-40 object-cover" />
+                ) : (
+                  <div className="w-full h-40 bg-blue-50 flex items-center justify-center text-blue-200">
+                    <DollarSign size={40} />
+                  </div>
+                )}
+                <button
+                  onClick={() => handleToggleFeatured(cat)}
+                  disabled={togglingId === cat._id}
+                  title={cat.isFeatured ? 'Remove from Home' : 'Feature on Home'}
+                  className={`absolute top-2 right-2 p-1.5 rounded-full shadow transition-colors ${
+                    cat.isFeatured ? 'bg-amber-400 text-white hover:bg-amber-500' : 'bg-white/80 text-gray-400 hover:bg-amber-50 hover:text-amber-500'
+                  }`}
+                >
+                  <Star size={14} fill={cat.isFeatured ? 'currentColor' : 'none'} />
+                </button>
+                {cat.isFeatured && (
+                  <span className="absolute top-2 left-2 bg-amber-400 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    Featured
+                  </span>
+                )}
+              </div>
               <div className="p-5">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-bold text-gray-900 text-lg">{cat.name}</h3>

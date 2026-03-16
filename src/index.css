@@ -221,3 +221,19 @@
 .pulse-gold {
   animation: pulseGold 2s cubic-bezier(.215,.61,.355,1) infinite;
 }
+
+/* ---- Infinite horizontal carousel ---- */
+@keyframes carouselScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.carousel-track {
+  display: flex;
+  width: max-content;
+  animation: carouselScroll 18s linear infinite;
+}
+
+.carousel-track:hover {
+  animation-play-state: paused;
+}

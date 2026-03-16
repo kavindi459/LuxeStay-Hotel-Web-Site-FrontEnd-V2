@@ -33,16 +33,17 @@ const Home = () => {
   const categoriesRef = useScrollReveal(0.08);
   const ctaRef        = useScrollReveal(0.2);
 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [catsRes, roomsRes, reviewsRes, bgRes] = await Promise.all([
-          api.get('/api/category/get?limit=100'),
+          api.get('/api/category/get?featured=true&limit=100'),
           api.get('/api/room/get'),
           api.get('/api/review/featured?limit=6'),
           api.get('/api/bgimage/settings'),
         ]);
-        setCategories((catsRes.data.data   || []).slice(0, 3));
+        setCategories(catsRes.data.data || []);
         setRooms(     (roomsRes.data.data  || []).slice(0, 3));
         setReviews(    reviewsRes.data.data || []);
         if (bgRes.data.data) setBgSettings((prev) => ({ ...prev, ...bgRes.data.data }));
@@ -105,7 +106,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── Categories ── */}
+      {/* ── Categories Carousel ── */}
       {categories.length > 0 && (
         <section
           ref={categoriesRef}
@@ -121,48 +122,51 @@ const Home = () => {
               <div className="w-16 h-1 bg-amber-500 mx-auto mt-4 rounded-full" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
-              {categories.map((cat, i) => (
-                <div
-                  key={cat._id}
-                  onClick={() => navigate(`/rooms?category=${cat._id}`)}
-                  className={`reveal stagger-${i + 1} card-hover bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer group`}
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    {cat.image ? (
-                      <img
-                        src={cat.image}
-                        alt={cat.name}
-                        className="img-zoom w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-800 to-blue-600 flex items-center justify-center">
-                        <span className="text-white text-4xl font-bold opacity-20">{cat.name[0]}</span>
+            {/* Infinite CSS carousel — overflow hidden clips the track */}
+            <div className="overflow-hidden">
+              <div className="carousel-track gap-6">
+                {[...categories, ...categories].map((cat, idx) => (
+                  <div
+                    key={`${cat._id}-${idx}`}
+                    onClick={() => navigate(`/rooms?category=${cat._id}`)}
+                    className="flex-none w-72 mx-3 card-hover bg-white rounded-2xl overflow-hidden shadow-sm cursor-pointer group"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      {cat.image ? (
+                        <img
+                          src={cat.image}
+                          alt={cat.name}
+                          className="img-zoom w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-blue-800 to-blue-600 flex items-center justify-center">
+                          <span className="text-white text-4xl font-bold opacity-20">{cat.name[0]}</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent" />
+                      <div className="absolute bottom-0 left-0 right-0 p-5">
+                        <h3 className="text-white font-bold text-xl">{cat.name}</h3>
+                        <p className="text-amber-400 font-bold text-lg">
+                          ${cat.price}
+                          <span className="text-gray-300 text-sm font-normal">/night</span>
+                        </p>
                       </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent" />
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <h3 className="text-white font-bold text-xl">{cat.name}</h3>
-                      <p className="text-amber-400 font-bold text-lg">
-                        ${cat.price}
-                        <span className="text-gray-300 text-sm font-normal">/night</span>
-                      </p>
+                    </div>
+                    <div className="p-5">
+                      <p className="text-gray-500 text-sm line-clamp-2">{cat.description}</p>
+                      {cat.features?.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-3">
+                          {cat.features.slice(0, 3).map((f) => (
+                            <span key={f} className="text-xs bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full">
+                              {f}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="p-5">
-                    <p className="text-gray-500 text-sm line-clamp-2">{cat.description}</p>
-                    {cat.features?.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-3">
-                        {cat.features.slice(0, 3).map((f) => (
-                          <span key={f} className="text-xs bg-blue-50 text-blue-700 px-2.5 py-0.5 rounded-full">
-                            {f}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </section>
