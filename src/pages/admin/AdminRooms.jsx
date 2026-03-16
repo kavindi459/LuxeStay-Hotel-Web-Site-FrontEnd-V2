@@ -5,7 +5,7 @@ import Modal from '../../components/ui/Modal.jsx';
 import Button from '../../components/ui/Button.jsx';
 import Badge from '../../components/ui/Badge.jsx';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Trash2, ToggleLeft, ToggleRight, BedDouble, Users } from 'lucide-react';
+import { Plus, Edit2, Trash2, ToggleLeft, ToggleRight, BedDouble, Users, X, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
 
 const AdminRooms = () => {
   const [rooms, setRooms] = useState([]);
@@ -64,6 +64,20 @@ const AdminRooms = () => {
         setForm((p) => ({ ...p, photos: [...p.photos, ev.target.result] }));
       };
       reader.readAsDataURL(file);
+    });
+  };
+
+  const removePhoto = (index) => {
+    setForm((p) => ({ ...p, photos: p.photos.filter((_, i) => i !== index) }));
+  };
+
+  const movePhoto = (index, dir) => {
+    const newIndex = index + dir;
+    if (newIndex < 0 || newIndex >= form.photos.length) return;
+    setForm((p) => {
+      const photos = [...p.photos];
+      [photos[index], photos[newIndex]] = [photos[newIndex], photos[index]];
+      return { ...p, photos };
     });
   };
 
@@ -265,9 +279,31 @@ const AdminRooms = () => {
             <input type="file" accept="image/*" multiple onChange={handlePhotoUpload}
               className="w-full text-sm border border-gray-300 rounded-lg px-3 py-2" />
             {form.photos.length > 0 && (
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {form.photos.map((p, i) => (
-                  <img key={i} src={p} alt="" className="w-14 h-14 object-cover rounded-lg border" />
+              <div className="mt-3 space-y-2">
+                {form.photos.map((photo, i) => (
+                  <div key={i} className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg p-2">
+                    <img src={photo} alt="" className="w-14 h-14 object-cover rounded-lg flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      {i === 0 && (
+                        <span className="inline-block text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full mb-0.5">Cover</span>
+                      )}
+                      <p className="text-xs text-gray-400">Photo {i + 1} of {form.photos.length}</p>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button type="button" onClick={() => movePhoto(i, -1)} disabled={i === 0}
+                        className="p-1 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" title="Move left">
+                        <ChevronLeft size={14} />
+                      </button>
+                      <button type="button" onClick={() => movePhoto(i, 1)} disabled={i === form.photos.length - 1}
+                        className="p-1 rounded hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors" title="Move right">
+                        <ChevronRight size={14} />
+                      </button>
+                      <button type="button" onClick={() => removePhoto(i)}
+                        className="p-1 rounded hover:bg-red-100 text-red-500 transition-colors" title="Remove photo">
+                        <X size={14} />
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}

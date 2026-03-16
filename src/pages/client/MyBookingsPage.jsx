@@ -5,9 +5,11 @@ import Modal from '../../components/ui/Modal.jsx';
 import Button from '../../components/ui/Button.jsx';
 import useBookings from '../../hooks/useBookings.js';
 import { formatDate, formatCurrency, calculateNights } from '../../utils/formatDate.js';
-import { CalendarDays, BedDouble, Hash, Star, MessageSquare, CheckCircle } from 'lucide-react';
+import { CalendarDays, BedDouble, Hash, Star, MessageSquare, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import api from '../../config/api.js';
 import toast from 'react-hot-toast';
+
+const PAGE_SIZE = 5;
 
 /* Inline star picker */
 const StarPicker = ({ rating, onChange }) => (
@@ -33,6 +35,7 @@ const MyBookingsPage = () => {
   const [cancelModal, setCancelModal] = useState({ open: false, booking: null });
   const [reason, setReason] = useState('');
   const [cancelling, setCancelling] = useState(false);
+  const [page, setPage] = useState(1);
 
   // Review state
   const [reviewModal, setReviewModal] = useState({ open: false, booking: null });
@@ -85,7 +88,7 @@ const MyBookingsPage = () => {
   };
 
   return (
-    <div className="bg-gray-50 mt-10">
+    <div className="bg-gray-50 mt-10 min-h-screen">
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1">
         <div className="mb-8">
@@ -107,8 +110,13 @@ const MyBookingsPage = () => {
             </a>
           </div>
         ) : (
+          (() => {
+            const totalPages = Math.ceil(bookings.length / PAGE_SIZE);
+            const paginated = bookings.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+            return (
+          <>
           <div className="space-y-4">
-            {bookings.map((booking) => {
+            {paginated.map((booking) => {
               const room = booking.roomId || {};
               const category = (room.category && typeof room.category === 'object') ? room.category : {};
               const nights = calculateNights(booking.checkInDate, booking.checkOutDate);
@@ -193,6 +201,47 @@ const MyBookingsPage = () => {
               );
             })}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-500">
+                Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, bookings.length)} of {bookings.length} bookings
+              </p>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                  <button
+                    key={n}
+                    onClick={() => setPage(n)}
+                    className={`w-9 h-9 rounded-lg text-sm font-medium transition-colors ${
+                      n === page
+                        ? 'bg-blue-800 text-white'
+                        : 'border border-gray-200 hover:bg-gray-50 text-gray-700'
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+          </>
+            );
+          })()
         )}
       </div>
 
