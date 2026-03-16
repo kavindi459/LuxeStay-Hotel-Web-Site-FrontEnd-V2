@@ -1,6 +1,6 @@
-import Navbar from '../Components/client/Navbar.jsx';
-import Footer from '../Components/client/Footer.jsx';
-import ScrollToTopButton from '../Components/ui/ScrollToTopButton.jsx';
+import Navbar from '../components/client/Navbar.jsx';
+import Footer from '../components/client/Footer.jsx';
+import ScrollToTopButton from '../components/ui/ScrollToTopButton.jsx';
 import { Outlet } from 'react-router-dom';
 
 const ClientLayout = () => (

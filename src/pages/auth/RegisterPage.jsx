@@ -5,7 +5,7 @@ import api from '../../config/api.js';
 import { Eye, EyeOff, AlertCircle, User, Mail, Phone, Lock } from 'lucide-react';
 import logo from '../../assets/Logo.png';
 import loginBg from '../../assets/Login.jpg';
-import Button from '../../Components/ui/Button.jsx';
+import Button from '../../components/ui/Button.jsx';
 
 const validate = (form) => {
   const errors = {};
