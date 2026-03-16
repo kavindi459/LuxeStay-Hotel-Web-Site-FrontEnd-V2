@@ -5,7 +5,8 @@ import Badge from '../../components/ui/Badge.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { formatDate } from '../../utils/formatDate.js';
 import toast from 'react-hot-toast';
-import { Search, ToggleLeft, ToggleRight, ShieldCheck, User } from 'lucide-react';
+import { Search, ToggleLeft, ToggleRight, ShieldCheck, User, Trash2 } from 'lucide-react';
+import Modal from '../../components/ui/Modal.jsx';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -15,6 +16,8 @@ const AdminUsers = () => {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [actionLoading, setActionLoading] = useState(null);
+  const [deleteModal, setDeleteModal] = useState({ open: false, user: null });
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => { fetchUsers(); }, []);
 
@@ -49,6 +52,20 @@ const AdminUsers = () => {
       toast.error('Failed to toggle user status');
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      await api.delete(`/api/users/delete/${deleteModal.user._id}`);
+      setUsers((prev) => prev.filter((u) => u._id !== deleteModal.user._id));
+      toast.success('User deleted!');
+      setDeleteModal({ open: false, user: null });
+    } catch {
+      toast.error('Failed to delete user');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -126,6 +143,13 @@ const AdminUsers = () => {
                         >
                           {u.role === 'Admin' ? <User size={16} /> : <ShieldCheck size={16} />}
                         </button>
+                        <button
+                          onClick={() => setDeleteModal({ open: true, user: u })}
+                          title="Delete User"
+                          className="p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -149,6 +173,21 @@ const AdminUsers = () => {
           )}
         </div>
       )}
+
+      {/* Delete Modal */}
+      <Modal isOpen={deleteModal.open} onClose={() => setDeleteModal({ open: false, user: null })} title="Delete User">
+        <div className="space-y-4">
+          <p className="text-gray-600">
+            Are you sure you want to permanently delete{' '}
+            <span className="font-bold text-gray-900">{deleteModal.user?.firstName} {deleteModal.user?.lastName}</span>?
+            This action cannot be undone.
+          </p>
+          <div className="flex gap-3 justify-end">
+            <Button variant="secondary" onClick={() => setDeleteModal({ open: false, user: null })}>Cancel</Button>
+            <Button variant="danger" onClick={handleDelete} loading={deleting}>Delete User</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

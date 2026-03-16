@@ -25,13 +25,9 @@ const RoomsPage = () => {
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('heroImages') || '{}');
-      if (saved.rooms) { setHeroImage(saved.rooms); return; }
-    } catch (e) { void e; }
-    api.get('/api/gallery/get').then((res) => {
-      const items = res.data.data || [];
-      if (items.length > 0) setHeroImage(items[0].image);
+    api.get('/api/bgimage/settings').then((res) => {
+      const sections = res.data.data || {};
+      if (sections.rooms) setHeroImage(sections.rooms);
     }).catch(() => {});
   }, []);
 

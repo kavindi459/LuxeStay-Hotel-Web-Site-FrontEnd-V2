@@ -6,13 +6,9 @@ const About = () => {
   const [heroImage, setHeroImage] = useState(null);
 
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem('heroImages') || '{}');
-      if (saved.about) { setHeroImage(saved.about); return; }
-    } catch (e) { void e; }
-    api.get('/api/gallery/get').then((res) => {
-      const items = res.data.data || [];
-      if (items.length > 0) setHeroImage(items[0].image);
+    api.get('/api/bgimage/settings').then((res) => {
+      const sections = res.data.data || {};
+      if (sections.about) setHeroImage(sections.about);
     }).catch(() => {});
   }, []);
   const stats = [

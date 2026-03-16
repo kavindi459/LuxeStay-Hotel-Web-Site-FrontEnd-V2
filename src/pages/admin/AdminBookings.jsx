@@ -6,7 +6,7 @@ import Modal from '../../components/ui/Modal.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { formatDate, formatCurrency, calculateNights } from '../../utils/formatDate.js';
 import toast from 'react-hot-toast';
-import { Search, Download, CheckCircle, XCircle, CreditCard, Building2 } from 'lucide-react';
+import { Search, Download, CheckCircle, XCircle, CreditCard, Building2, Trash2 } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -19,6 +19,7 @@ const AdminBookings = () => {
   const [cancelModal, setCancelModal] = useState({ open: false, booking: null, reason: '' });
   const [actionLoading, setActionLoading] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ open: false, booking: null });
+  const [deleteModal, setDeleteModal] = useState({ open: false, booking: null });
 
   useEffect(() => {
     fetchBookings();
@@ -70,6 +71,20 @@ const AdminBookings = () => {
       fetchBookings();
     } catch {
       toast.error('Failed to cancel booking');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setActionLoading(true);
+    try {
+      await api.delete(`/api/booking/delete/${deleteModal.booking._id}`);
+      toast.success('Booking deleted!');
+      setDeleteModal({ open: false, booking: null });
+      fetchBookings();
+    } catch {
+      toast.error('Failed to delete booking');
     } finally {
       setActionLoading(false);
     }
@@ -182,6 +197,13 @@ const AdminBookings = () => {
                               </button>
                             </>
                           )}
+                          <button
+                            onClick={() => setDeleteModal({ open: true, booking: b })}
+                            className="p-1.5 text-red-400 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={15} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -260,6 +282,17 @@ const AdminBookings = () => {
           <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setCancelModal({ open: false, booking: null, reason: '' })}>Back</Button>
             <Button variant="danger" onClick={handleCancel} loading={actionLoading} disabled={!cancelModal.reason.trim()}>Confirm Cancel</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Modal */}
+      <Modal isOpen={deleteModal.open} onClose={() => setDeleteModal({ open: false, booking: null })} title="Delete Booking">
+        <div className="space-y-4">
+          <p className="text-gray-600">Are you sure you want to permanently delete booking <span className="font-bold text-blue-800">#{deleteModal.booking?.bookingId}</span>? This action cannot be undone.</p>
+          <div className="flex gap-3 justify-end">
+            <Button variant="secondary" onClick={() => setDeleteModal({ open: false, booking: null })}>Cancel</Button>
+            <Button variant="danger" onClick={handleDelete} loading={actionLoading}>Delete</Button>
           </div>
         </div>
       </Modal>
