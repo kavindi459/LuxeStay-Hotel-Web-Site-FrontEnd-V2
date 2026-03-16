@@ -4,27 +4,27 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './store/authStore.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import ClientLayout from './layouts/ClientLayout.jsx';
+import AdminLayout from './layouts/AdminLayout.jsx';
 
-// Existing pages
-import Home from './Pages/Client Page/home.jsx';
-import About from './Pages/Client Page/about.jsx';
-import NotFound from './Components/Client Components/NotFound.jsx';
-import AdminLayout from './Components/Admin common/ALayOut.jsx';
-import LoginPage from './Pages/Auth/loginPage.jsx';
+// Client Pages
+import Home from './pages/client/HomePage.jsx';
+import About from './pages/client/AboutPage.jsx';
+import RoomsPage from './pages/client/RoomsPage.jsx';
+import RoomDetailPage from './pages/client/RoomDetailPage.jsx';
+import BookingPage from './pages/client/BookingPage.jsx';
+import MyBookingsPage from './pages/client/MyBookingsPage.jsx';
+import GalleryPage from './pages/client/GalleryPage.jsx';
+import ContactPage from './pages/client/ContactPage.jsx';
+import ProfilePage from './pages/client/ProfilePage.jsx';
 
-// New Auth pages
+// Auth Pages
+import LoginPage from './pages/auth/LoginPage.jsx';
 import RegisterPage from './pages/auth/RegisterPage.jsx';
 import OTPVerifyPage from './pages/auth/OTPVerifyPage.jsx';
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage.jsx';
 
-// New Client pages
-import RoomsPage from '../src/Pages/Client Page/RoomsPage.jsx';
-import RoomDetailPage from '../src/Pages/Client Page/RoomDetailPage.jsx';
-import BookingPage from '../src/Pages/Client Page/BookingPage.jsx';
-import MyBookingsPage from '../src/Pages/Client Page/MyBookingsPage.jsx';
-import ProfilePage from '../src/Pages/Client Page/ProfilePage.jsx';
-import GalleryPage from '../src/Pages/Client Page/GalleryPage.jsx';
-import ContactPage from '../src/Pages/Client Page/ContactPage.jsx';
+// Shared
+import NotFound from './components/NotFound.jsx';
 
 function App() {
   return (

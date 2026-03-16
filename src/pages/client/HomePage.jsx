@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import api from '../../config/api.js';
 
-import HeroSection          from '../../Components/Client Components/HeroSection.jsx';
-import FeaturesSection      from '../../Components/Client Components/FeaturesSection.jsx';
-import FeaturedRoomsSection from '../../Components/Client Components/FeaturedRoomsSection.jsx';
-import CategoriesCarousel   from '../../Components/Client Components/CategoriesCarousel.jsx';
-import ReviewsCarousel      from '../../Components/Client Components/ReviewsCarousel.jsx';
-import CtaBanner            from '../../Components/Client Components/CtaBanner.jsx';
-import DestinationsCarousel from '../../Components/Client Components/DestinationsCarousel.jsx';
+import HeroSection          from '../../components/client/HeroSection.jsx';
+import FeaturesSection      from '../../components/client/FeaturesSection.jsx';
+import FeaturedRoomsSection from '../../components/client/FeaturedRoomsSection.jsx';
+import CategoriesCarousel   from '../../components/client/CategoriesCarousel.jsx';
+import ReviewsCarousel      from '../../components/client/ReviewsCarousel.jsx';
+import CtaBanner            from '../../components/client/CtaBanner.jsx';
+import DestinationsCarousel from '../../components/client/DestinationsCarousel.jsx';
 
 const DEFAULTS = {
   homeHero:  'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1800',

@@ -1,5 +1,5 @@
-import Navbar from '../Components/Client Common/Navbar.jsx';
-import Footer from '../Components/Client Common/Footer.jsx';
+import Navbar from '../components/client/Navbar.jsx';
+import Footer from '../components/client/Footer.jsx';
 import ScrollToTopButton from '../components/ui/ScrollToTopButton.jsx';
 import { Outlet } from 'react-router-dom';
 

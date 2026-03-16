@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import RoomCard from '../../Components/Client Components/RoomCard.jsx';
-import Spinner from '../../Components/ui/Spinner.jsx';
+import RoomCard from '../../components/client/RoomCard.jsx';
+import Spinner from '../../components/ui/Spinner.jsx';
 import api from '../../config/api.js';
 import { SlidersHorizontal, X } from 'lucide-react';
 

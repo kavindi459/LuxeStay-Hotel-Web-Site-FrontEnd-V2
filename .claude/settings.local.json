@@ -1,7 +1,31 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git filter-repo:*)"
+      "Bash(git filter-repo:*)",
+      "Bash(cp \"src/Components/Client Common/Navbar.jsx\" src/components/client/Navbar.jsx)",
+      "Bash(cp \"src/Components/Client Common/Footer.jsx\" src/components/client/Footer.jsx)",
+      "Bash(cp \"src/Components/Client Components/HeroSection.jsx\" src/components/client/HeroSection.jsx)",
+      "Bash(cp \"src/Components/Client Components/FeaturesSection.jsx\" src/components/client/FeaturesSection.jsx)",
+      "Bash(cp \"src/Components/Client Components/FeaturedRoomsSection.jsx\" src/components/client/FeaturedRoomsSection.jsx)",
+      "Bash(cp \"src/Components/Client Components/CategoriesCarousel.jsx\" src/components/client/CategoriesCarousel.jsx)",
+      "Bash(cp \"src/Components/Client Components/ReviewsCarousel.jsx\" src/components/client/ReviewsCarousel.jsx)",
+      "Bash(cp \"src/Components/Client Components/CtaBanner.jsx\" src/components/client/CtaBanner.jsx)",
+      "Bash(cp \"src/Components/Client Components/DestinationsCarousel.jsx\" src/components/client/DestinationsCarousel.jsx)",
+      "Bash(cp \"src/Components/Client Components/RoomCard.jsx\" src/components/client/RoomCard.jsx)",
+      "Bash(cp \"src/Components/Client Components/TestimonialsSection.jsx\" src/components/client/TestimonialsSection.jsx)",
+      "Bash(cp \"src/Components/Client Components/Header.jsx\" src/components/client/Header.jsx)",
+      "Bash(cp \"src/Components/Client Components/UserTag.jsx\" src/components/client/UserTag.jsx)",
+      "Bash(cp \"src/Components/Client Components/NotFound.jsx\" src/components/NotFound.jsx)",
+      "Bash(cp \"src/Pages/Admin Page/AdminDashboard.jsx\" src/pages/admin/AdminDashboard.jsx)",
+      "Bash(cp \"src/Pages/Admin Page/AdminBookings.jsx\" src/pages/admin/AdminBookings.jsx)",
+      "Bash(cp \"src/Pages/Admin Page/AdminRooms.jsx\" src/pages/admin/AdminRooms.jsx)",
+      "Bash(cp \"src/Pages/Admin Page/AdminCategories.jsx\" src/pages/admin/AdminCategories.jsx)",
+      "Bash(cp \"src/Pages/Admin Page/AdminUsers.jsx\" src/pages/admin/AdminUsers.jsx)",
+      "Bash(cp \"src/Pages/Admin Page/AdminGallery.jsx\" src/pages/admin/AdminGallery.jsx)",
+      "Bash(cp \"src/Pages/Admin Page/AdminReviews.jsx\" src/pages/admin/AdminReviews.jsx)",
+      "Bash(cp \"src/Pages/Admin Page/AdminContacts.jsx\" src/pages/admin/AdminContacts.jsx)",
+      "Bash(cp \"src/Pages/Admin Page/AdminDestinations.jsx\" src/pages/admin/AdminDestinations.jsx)",
+      "Bash(cp \"src/Pages/Admin Page/AdminBgImages.jsx\" src/pages/admin/AdminBgImages.jsx)"
     ]
   }
 }
