@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../../config/api.js';
 import { KeyRound } from 'lucide-react';
-import logo from '../../assets/logo.png';
-import Button from '../../components/ui/Button.jsx';
+import logo from '../../assets/Logo.png';
+import Button from '../../Components/ui/Button.jsx';
 
 const ForgotPasswordPage = () => {
   const navigate = useNavigate();
