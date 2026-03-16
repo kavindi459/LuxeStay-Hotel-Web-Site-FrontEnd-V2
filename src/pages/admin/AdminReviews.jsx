@@ -6,7 +6,7 @@ import Button from '../../components/ui/Button.jsx';
 import StarRating from '../../components/ui/StarRating.jsx';
 import { formatDate } from '../../utils/formatDate.js';
 import toast from 'react-hot-toast';
-import { CheckCircle, XCircle, Trash2, Star, MessageSquare, Eye, EyeOff } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, Star, MessageSquare, Eye, EyeOff, RefreshCw } from 'lucide-react';
 
 const AdminReviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -73,12 +73,17 @@ const AdminReviews = () => {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <MessageSquare size={22} className="text-amber-500" />
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Reviews Management</h1>
-          <p className="text-xs text-gray-400">Accept reviews to show them on the homepage</p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <MessageSquare size={22} className="text-amber-500" />
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Reviews Management</h1>
+            <p className="text-xs text-gray-400">Accept reviews to show them on the homepage</p>
+          </div>
         </div>
+        <button onClick={fetchReviews} className="flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+          <RefreshCw size={14} /> Refresh
+        </button>
       </div>
 
       {/* Stats */}

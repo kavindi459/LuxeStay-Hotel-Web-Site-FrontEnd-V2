@@ -4,7 +4,7 @@ import Spinner from '../../components/ui/Spinner.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import Button from '../../components/ui/Button.jsx';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Upload, Star } from 'lucide-react';
+import { Plus, Trash2, Upload, Star, RefreshCw } from 'lucide-react';
 
 const AdminGallery = () => {
   const [items,       setItems]       = useState([]);
@@ -79,7 +79,10 @@ const AdminGallery = () => {
 
   return (
     <div className="space-y-5">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <button onClick={fetchItems} className="flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+          <RefreshCw size={14} /> Refresh
+        </button>
         <Button onClick={() => setUploadModal(true)} className="flex items-center gap-2">
           <Upload size={16} /> Upload Image
         </Button>

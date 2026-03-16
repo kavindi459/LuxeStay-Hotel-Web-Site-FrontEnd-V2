@@ -5,7 +5,7 @@ import Badge from '../../components/ui/Badge.jsx';
 import Button from '../../components/ui/Button.jsx';
 import { formatDate } from '../../utils/formatDate.js';
 import toast from 'react-hot-toast';
-import { Search, ToggleLeft, ToggleRight, ShieldCheck, User, Trash2 } from 'lucide-react';
+import { Search, ToggleLeft, ToggleRight, ShieldCheck, User, Trash2, RefreshCw } from 'lucide-react';
 import Modal from '../../components/ui/Modal.jsx';
 
 const ITEMS_PER_PAGE = 10;
@@ -85,14 +85,19 @@ const AdminUsers = () => {
 
   return (
     <div className="space-y-5">
-      <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-        <input
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          placeholder="Search by name or email..."
-          className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 bg-white shadow-sm"
-        />
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            placeholder="Search by name or email..."
+            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-800 bg-white shadow-sm"
+          />
+        </div>
+        <button onClick={fetchUsers} className="flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 px-3 py-2.5 rounded-xl hover:bg-gray-50 font-medium transition-colors bg-white shadow-sm whitespace-nowrap">
+          <RefreshCw size={14} /> Refresh
+        </button>
       </div>
 
       {loading ? (

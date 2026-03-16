@@ -5,7 +5,7 @@ import Modal from '../../components/ui/Modal.jsx';
 import Button from '../../components/ui/Button.jsx';
 import Badge from '../../components/ui/Badge.jsx';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Trash2, ToggleLeft, ToggleRight, BedDouble, Users, X, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
+import { Plus, Edit2, Trash2, ToggleLeft, ToggleRight, BedDouble, Users, X, ChevronLeft, ChevronRight, GripVertical, RefreshCw } from 'lucide-react';
 
 const AdminRooms = () => {
   const [rooms, setRooms] = useState([]);
@@ -157,9 +157,14 @@ const AdminRooms = () => {
             {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
         </div>
-        <Button onClick={openAdd} className="flex items-center gap-2">
-          <Plus size={16} /> Add Room
-        </Button>
+        <div className="flex items-center gap-2">
+          <button onClick={fetchData} className="flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+            <RefreshCw size={14} /> Refresh
+          </button>
+          <Button onClick={openAdd} className="flex items-center gap-2">
+            <Plus size={16} /> Add Room
+          </Button>
+        </div>
       </div>
 
       {loading ? (

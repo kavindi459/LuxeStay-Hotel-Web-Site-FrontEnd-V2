@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapPin, Plus, Pencil, Trash2, Globe, Upload, Link2, Star } from 'lucide-react';
+import { MapPin, Plus, Pencil, Trash2, Globe, Upload, Link2, Star, RefreshCw } from 'lucide-react';
 import Modal from '../../components/ui/Modal.jsx';
 import Spinner from '../../components/ui/Spinner.jsx';
 import toast from 'react-hot-toast';
@@ -164,12 +164,17 @@ const AdminDestinations = () => {
             These appear as a carousel on the home page below the CTA section.
           </p>
         </div>
-        <button
-          onClick={openAdd}
-          className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold bg-blue-800 hover:bg-blue-900 text-white transition-colors"
-        >
-          <Plus size={16} /> Add Destination
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={fetchAll} className="flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+            <RefreshCw size={14} /> Refresh
+          </button>
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold bg-blue-800 hover:bg-blue-900 text-white transition-colors"
+          >
+            <Plus size={16} /> Add Destination
+          </button>
+        </div>
       </div>
 
       {/* Grid */}

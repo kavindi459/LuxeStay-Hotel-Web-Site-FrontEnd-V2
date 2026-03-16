@@ -4,7 +4,7 @@ import Spinner from '../../components/ui/Spinner.jsx';
 import Modal from '../../components/ui/Modal.jsx';
 import Button from '../../components/ui/Button.jsx';
 import toast from 'react-hot-toast';
-import { Plus, Edit2, Trash2, DollarSign, Star } from 'lucide-react';
+import { Plus, Edit2, Trash2, DollarSign, Star, RefreshCw } from 'lucide-react';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -111,7 +111,10 @@ const AdminCategories = () => {
 
   return (
     <div className="space-y-5">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <button onClick={fetchCategories} className="flex items-center gap-1.5 text-sm text-gray-600 border border-gray-200 px-3 py-2 rounded-lg hover:bg-gray-50 font-medium transition-colors">
+          <RefreshCw size={14} /> Refresh
+        </button>
         <Button onClick={openAdd} className="flex items-center gap-2">
           <Plus size={16} /> Add Category
         </Button>
